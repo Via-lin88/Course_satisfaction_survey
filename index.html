@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課程滿意度暨學習回饋問卷</title>
+    
+    <style>
+        /* 基礎樣式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC", sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 問卷容器 */
+        .survey-container {
+            width: 100%;
+            max-width: 750px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* 問卷標頭 */
+        .survey-header {
+            background-color: #0056b3; /* 奇美藍 (示意) */
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .survey-header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        /* 問卷介紹文字 */
+        .survey-intro {
+            padding: 24px;
+            background-color: #fdfdfd;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* 問卷表單 */
+        .survey-form {
+            padding: 30px;
+        }
+
+        /* 表單的 "部分" (例如: 第一部分) */
+        .form-section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .form-section h2 {
+            font-size: 20px;
+            color: #0056b3;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* 每個問題區塊 */
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        /* 輸入框 (文字) */
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box; /* 確保 padding 不會撐開寬度 */
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+        }
+
+        /* 建議文字區 */
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* 選項群組 (身分別, 年資) */
+        .radio-vertical-group .radio-label {
+            display: block;
+            padding: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .radio-vertical-group .radio-label:hover {
+            background-color: #f9f9f9;
+        }
+        .radio-vertical-group input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        /* 其他 (文字框) */
+        .other-input {
+            margin-left: 30px;
+            margin-top: 5px;
+            width: 80%;
+        }
+
+        /* * 滿意度量表 (Part 2 & 3)
+         * 使用 table 來確保對齊 
+        */
+        .likert-container {
+            width: 100%;
+            overflow-x: auto; /* 在小螢幕上可以滑動 */
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .likert-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px; /* 確保在小螢幕上不會擠壓 */
+        }
+
+        .likert-table th,
+        .likert-table td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .likert-table thead th {
+            background-color: #f8f8f8;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .likert-table tbody td:first-child {
+            text-align: left;
+            font-weight: 500;
+            padding-left: 16px;
+            font-size: 15px;
+            min-width: 250px; /* 讓題項文字有足夠空間 */
+        }
+
+        .likert-table tbody tr:hover {
+            background-color: #fcfcfc;
+        }
+
+        .likert-table input[type="radio"] {
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+        
+        /* 指導語 */
+        .guidance-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        /* 提交按鈕 */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745; /* 綠色 */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+        
+        /* 當按鈕在 "載入中" 時的樣式 */
+        .submit-btn:disabled {
+            background-color: #94d3a2;
+            cursor: not-allowed;
+        }
+
+        /* *【新加入】: 彈出式訊息 (Modal) 的樣式 
+         */
+        
+        /* 遮罩層 (背景變暗) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+        }
+        
+        /* 訊息框本人 */
+        .modal-content {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        
+        /* 當 modal-overlay 變成 .show 時 */
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        /* 訊息框的標題 (例如 "成功" 或 "失敗") */
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        /* 成功 (綠色) */
+        .modal-content.success h2 {
+            color: #28a745;
+        }
+        /* 失敗 (紅色) */
+        .modal-content.error h2 {
+            color: #dc3545;
+        }
+        
+        /* 訊息框的 "關閉" 按鈕 */
+        .modal-close-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .modal-close-btn:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 這是 HTML 結構 -->
+    <div class="survey-container">
+        
+        <header class="survey-header">
+            <h1>課程滿意度暨學習回饋問卷</h1>
+        </header>
+
+        <div class="survey-intro">
+            <p>親愛的同仁，您好：</p>
+            <p>感謝您參與本次由教學部舉辦的課程。為確保未來的課程更貼近同仁的需求並持續提升品質，請您撥冗填寫以下回饋問卷。您的寶貴意見是我們不斷進步的動力！</p>
+        </div>
+
+        <form class="survey-form" id="surveyForm">
+            
+            <!-- 
+                第一部分：基本資料
+            -->
+            <section class="form-section">
+                <h2>📝 第一部分：基本資料</h2>
+
+                <div class="form-group">
+                    <label for="employeeId">人事號</label>
+                    <input type="text" id="employeeId" name="employeeId" class="form-control" placeholder="請輸入您的人事號">
+                </div>
+
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="請輸入您的姓名" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">1. 您的服務單位/科別</label>
+                    <input type="text" id="department" name="department" class="form-control" placeholder="請輸入您的單位科別" required>
+                </div>
+
+                <div class="form-group">
+                    <label>2. 您的身分別</label>
+                    <div class="radio-vertical-group" id="identityGroup">
+                        <label class="radio-label"><input type="radio" name="identity" value="醫師" required> 醫師</label>
+                        <label class="radio-label"><input type="radio" name="identity" value="醫護人員"> 醫護人員 (含護L師、專科護理師等)</label>
+                        <label class="radio-label"><input type="radio" name="identity" value="醫技人員"> 醫技人員 (含藥/檢/放/復健/營養等)</label>
+                        <label class="radio-label"><input type="radio" name="identity" value="行政人員"> 行政人員</label>
+                        <label class="radio-label">
+                            <input type="radio" name="identity" value="其他"> 其他：
+                            <input type="text" name="identity_other" class="form-control other-input" placeholder="請說明">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>3. 您的工作總年資</label>
+                    <div class="radio-vertical-group" id="yearsGroup">
+                        <label class="radio-label"><input type="radio" name="workYears" value="0-3年" required> 0-3 年</label>
+                        <label class="radio-label"><input type="radio" name="workYears" value="4-10年"> 4-10 年</label>
+                        <label class="radio-label"><input type="radio" name="workYears" value="11年以上"> 11 年（含）以上</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 
+                第二部分：課程滿意度 
+            -->
+            <section class="form-section">
+                <h2>📊 第二部分：課程滿意度 (必填)</h2>
+                <p class="guidance-text">指導語： 請針對本次課程的「講師」與「安排」給予整體評分。(5=非常同意, 4=同意, 3=普通, 2=不同意, 1=非常不同意)</p>
+                
+                <div class="likert-container">
+                    <table class="likert-table">
+                        <thead>
+                            <tr>
+                                <th>題項</th>
+                                <th>非常同意(5)</th>
+                                <th>同意(4)</th>
+                                <th>普通(3)</th>
+                                <th>不同意(2)</th>
+                                <th>非常不同意(1)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>4. 講師具備豐富的專業知識與教學熱忱。</td>
+                                <td><input type="radio" name="q4_knowledge" value="5" required></td>
+                                <td><input type="radio" name="q4_knowledge" value="4"></td>
+                                <td><input type="radio" name="q4_knowledge" value="3"></td>
+                                <td><input type="radio" name="q4_knowledge" value="2"></td>
+                                <td><input type="radio" name="q4_knowledge" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>5. 課程教材內容與活動安排準備充分。</td>
+                                <td><input type="radio" name="q5_material" value="5" required></td>
+                                <td><input type="radio" name="q5_material" value="4"></td>
+                                <td><input type="radio" name="q5_material" value="3"></td>
+                                <td><input type="radio" name="q5_material" value="2"></td>
+                                <td><input type="radio" name="q5_material" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>6. 課程教學清晰有條理，能掌握重點。</td>
+                                <td><input type="radio" name="q6_clarity" value="5" required></td>
+                                <td><input type="radio" name="q6_clarity" value="4"></td>
+                                <td><input type="radio" name="q6_clarity" value="3"></td>
+                                <td><input type="radio" name="q6_clarity" value="2"></td>
+                                <td><input type="radio" name="q6_clarity" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>7. 課程時間與環境(含硬體設備)安排適當。</td>
+                                <td><input type="radio" name="q7_env" value="5" required></td>
+                                <td><input type="radio" name="q7_env" value="4"></td>
+                                <td><input type="radio" name="q7_env" value="3"></td>
+                                <td><input type="radio" name="q7_env" value="2"></td>
+                                <td><input type="radio" name="q7_env" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>8. 整體而言，我對本次課程感到滿意。</td>
+                                <td><input type="radio" name="q8_overall" value="5" required></td>
+                                <td><input type="radio" name="q8_overall" value="4"></td>
+                                <td><input type="radio" name="q8_overall" value="3"></td>
+                                <td><input type="radio" name="q8_overall" value="2"></td>
+                                <td><input type="radio" name="q8_overall" value="1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 
+                第三部分：學習與應用 
+            -->
+            <section class="form-section">
+                <h2>📈 第三部分：學習與應用 (必填)</h2>
+                <p class="guidance-text">請評估您在「學習成效」與「未來應用」方面的看法。(5=非常同意, 4=同意, 3=普通, 2=不同意, 1=非常不同意)</p>
+
+                <div class="likert-container">
+                    <table class="likert-table">
+                        <thead>
+                            <tr>
+                                <th>題項</th>
+                                <th>非常同意(5)</th>
+                                <th>同意(4)</th>
+                                <th>普通(3)</th>
+                                <th>不同意(2)</th>
+                                <th>非常不同意(1)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>9. 課程內容符合我個人的學習需求。</td>
+                                <td><input type="radio" name="q9_needs" value="5" required></td>
+                                <td><input type="radio" name="q9_needs" value="4"></td>
+                                <td><input type="radio" name="q9_needs" value="3"></td>
+                                <td><input type="radio" name="q9_needs" value="2"></td>
+                                <td><input type="radio" name="q9_needs" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>10. 我認為我已達成本課程設定的學習目標。</td>
+                                <td><input type="radio" name="q10_goals" value="5" required></td>
+                                <td><input type="radio" name="q10_goals" value="4"></td>
+                                <td><input type="radio" name="q10_goals" value="3"></td>
+                                <td><input type="radio" name="q10_goals" value="2"></td>
+                                <td><input type="radio" name="q10_goals" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>11. 本課程的內容與我的工作實務相關。</td>
+                                <td><input type="radio" name="q11_relevant" value="5" required></td>
+                                <td><input type="radio" name="q11_relevant" value="4"></td>
+                                <td><input type="radio" name="q11_relevant" value="3"></td>
+                                <td><input type="radio" name="q11_relevant" value="2"></td>
+                                <td><input type="radio" name="q11_relevant" value="1"></td>
+                            </tr>
+                            <tr>
+                                <td>12. 我計劃將本次課程所學，應用於我的日常工作中。</td>
+                                <td><input type="radio" name="q12_apply" value="5" required></td>
+                                <td><input type="radio" name="q12_apply" value="4"></td>
+                                <td><input type="radio" name="q12_apply" value="3"></td>
+                                <td><input type="radio" name="q12_apply" value="2"></td>
+                                <td><input type="radio" name="q12_apply" value="1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 
+                第四部分：質性回饋 
+            -->
+            <section class="form-section">
+                <h2>💡 第四部分：質性回饋 (必填)</h2>
+
+                <div class="form-group">
+                    <label for="q13_insight">13. 本次課程中，讓您印象最深刻或最有啟發的一個觀點或技巧是什麼？</label>
+                    <textarea id="q13_insight" name="q13_insight" class="form-control" placeholder="請在此填寫..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="q14_application">14. 承上題，您具體打算如何將所學應用在工作上？</label>
+                    <textarea id="q14_application" name="q14_application" class="form-control" placeholder="請在此填寫..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="q15_suggestion">15. 對於本課程（例如：內容深度、教學方式、時間安排等），您有何具體的改善建議？</label>
+                    <textarea id="q15_suggestion" name="q15_suggestion" class="form-control" placeholder="請在此填寫..." required></textarea>
+                </div>
+            </section>
+
+            <!-- 提交按鈕 -->
+            <div class="form-group">
+                <button type="submit" class="submit-btn" id="submitBtn">提交問卷</button>
+            </div>
+
+        </form>
+
+        <footer class="survey-footer">
+            <p>主辦單位：教學部 | 聯絡人：林淑雅 (分機57438；信箱cmh90022@mail.chimei.org.tw)</p>
+        </footer>
+    </div>
+
+    <!-- 
+      【新加入】: 彈出式訊息 (Modal) 的 HTML 結構 
+      它一開始是隱藏的
+    -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <button class="modal-close-btn" id="modalCloseBtn">關閉</button>
+        </div>
+    </div>
+
+
+    <!-- 
+      **********************************************
+      * *
+      * 【步驟三】JavaScript 核心            *
+      * *
+      **********************************************
+    -->
+    <script>
+        // 1. 把您剛剛給我的 Apps Script URL 貼在這裡
+        //    !! 警告 !! 請勿外洩此 URL，它沒有金鑰保護
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPnzKgvRT2nHA05pwVTksaibKcgtlmfOfXLIUbHyBndWbn5tvMY-NDpVVL3g0YpLEEkw/exec";
+
+        // 2. 獲取我們需要操作的 HTML 元件
+        const form = document.getElementById('surveyForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // 獲取 Modal (彈出訊息) 相關元件
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalContent = document.getElementById('modalContent');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        // 3. 監聽表單的 "submit" (提交) 事件
+        form.addEventListener('submit', function(e) {
+            
+            // 4. (重要) 防止表單的預設提交行為 (不要讓頁面跳轉)
+            e.preventDefault();
+
+            // 5. 鎖定按鈕，顯示 "提交中..."
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中，請稍候...';
+
+            // 6. 使用 FormData 獲取表單中的所有資料
+            const formData = new FormData(form);
+
+            // 7. 使用 fetch API，將資料 "POST" 到您的 Apps Script 網址
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json()) // 將 Apps Script 的回傳值轉為 JSON
+            .then(data => {
+                // 8. 處理 Apps Script 的回傳結果
+                if (data.result === 'success') {
+                    // 成功！
+                    showModal('success', '提交成功！', '感謝您的寶貴回饋，問卷已成功送出。');
+                    form.reset(); // 清空表單
+                } else {
+                    // 失敗 (可能是 Apps Script 程式碼出錯)
+                    throw new Error(data.message || '發生未知的錯誤');
+                }
+            })
+            .catch(error => {
+                // 9. 處理 fetch 本身的錯誤 (例如網路斷線，或 CORS 錯誤)
+                console.error('Fetch 錯誤:', error);
+                showModal('error', '提交失敗！', '無法連接到伺服器，請檢查您的網路連線，或稍後再試。');
+            })
+            .finally(() => {
+                // 10. (無論成功或失敗) 都要恢復按鈕
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交問卷';
+            });
+        });
+
+        // 11. 顯示 Modal (彈出訊息) 的輔助函式
+        function showModal(type, title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            
+            // 移除舊的 class，加上新的
+            modalContent.classList.remove('success', 'error');
+            modalContent.classList.add(type); // 'success' 或 'error'
+            
+            // 顯示 Modal
+            modalOverlay.classList.add('show');
+        }
+
+        // 12. 監聽 Modal 的 "關閉" 按鈕
+        modalCloseBtn.addEventListener('click', function() {
+            modalOverlay.classList.remove('show');
+        });
+        
+        // (可選) 點擊背景遮罩時也關閉
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+    </script>
+
+</body>
+</html>
