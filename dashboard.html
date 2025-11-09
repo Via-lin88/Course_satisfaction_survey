@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課程回饋儀表板</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", "PingFang TC", sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #0056b3;
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-container h1 {
+            margin: 0;
+        }
+
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 響應式卡片 */
+            gap: 20px;
+            max-width: 900px;
+            margin: 20px auto;
+        }
+
+        .feedback-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            padding: 16px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-header strong {
+            color: #333;
+        }
+
+        .card-header .timestamp {
+            font-size: 12px;
+            color: #888;
+            float: right;
+        }
+
+        .card-body {
+            padding: 16px;
+            flex-grow: 1;
+        }
+        
+        .card-body h4 {
+            font-size: 14px;
+            color: #0056b3;
+            margin-top: 0;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+        }
+
+        .card-body p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555;
+            margin: 0 0 16px 0;
+        }
+
+        #loading-indicator {
+            text-align: center;
+            font-size: 20px;
+            color: #555;
+            padding: 50px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>課程滿意度 - 質性回饋</h1>
+    </div>
+
+    <!-- 載入中提示 -->
+    <div id="loading-indicator">
+        <p>載入回饋資料中，請稍候...</p>
+    </div>
+
+    <!-- 回饋卡片將會被動態插入到這裡 -->
+    <div class="feedback-grid" id="feedback-container">
+        <!-- 
+        範例卡片結構 (會由 JavaScript 自動生成):
+        <div class="feedback-card">
+            <div class="card-header">
+                <strong>來自: 陳O明 (醫護人員)</strong>
+                <span class="timestamp">2025/11/09 10:30</span>
+            </div>
+            <div class="card-body">
+                <h4>最有啟發的觀點</h4>
+                <p>AI 的指令技巧，原來可以這麼白話。</p>
+                <h4>打算如何應用</h4>
+                <p>我會嘗試在我的工作報告中，用 AI 輔助。</p>
+                <h4>具體改善建議</h4>
+                <p>希望課程時間可以再長一點。</p>
+            </div>
+        </div>
+        -->
+    </div>
+
+    <script>
+        // 1. 您的 Apps Script 網址 (同一個！)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPnzKgvRT2nHA05pwVTksaibKcgtlmfOfXLIUbHyBndWbn5tvMY-NDpVVL3g0YpLEEkw/exec";
+
+        // 2. 獲取要放置卡片的容器 和 載入提示
+        const container = document.getElementById('feedback-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // 3. 在頁面載入時，自動執行 "fetchData" 函式
+        window.addEventListener('load', fetchData);
+
+        // 4. "fetchData" 函式 (核心)
+        function fetchData() {
+            // 發送 "GET" 請求到您的 Apps Script 網址
+            // (不帶任何 "method" 選項，預設就是 GET)
+            fetch(SCRIPT_URL)
+                .then(response => response.json())
+                .then(result => {
+                    // 檢查管家 (Apps Script) 是否成功回報
+                    if (result.status === 'success') {
+                        // 成功，隱藏 "載入中"
+                        loadingIndicator.style.display = 'none';
+                        // 呼叫 "renderCards" 來顯示卡片
+                        renderCards(result.data);
+                    } else {
+                        throw new Error(result.message || '讀取資料失敗');
+                    }
+                })
+                .catch(error => {
+                    // 失敗 (例如 Apps Script 寫錯、網路不通)
+                    console.error('Fetch 錯誤:', error);
+                    loadingIndicator.innerHTML = '<p style="color: red;">讀取回饋資料失敗！請檢查 Apps Script 部署或網路連線。</p>';
+                });
+        }
+
+        // 5. "renderCards" 函式 (用來把資料變成 HTML)
+        function renderCards(feedbackList) {
+            // 如果沒有回饋
+            if (feedbackList.length === 0) {
+                container.innerHTML = '<p>目前沒有任何回饋資料。</p>';
+                return;
+            }
+
+            // 遍歷 (forEach) 每一筆回饋資料
+            feedbackList.forEach(item => {
+                // 處理資料 (item[0] 是時間, item[1] 是姓名, ... )
+                const timestamp = new Date(item[0]).toLocaleString('zh-TW', { dateStyle: 'short', timeStyle: 'short' });
+                const name = item[1] ? item[1].charAt(0) + 'O' + item[1].slice(-1) : '匿名'; // 姓名打碼, e.g., "林O雅"
+                const identity = item[2] || '未填寫'; // 身分別
+                const q13_insight = item[3] || '無';
+                const q14_application = item[4] || '無';
+                const q15_suggestion = item[5] || '無';
+
+                // 組合 HTML 卡片字串
+                const cardHtml = `
+                    <div class="feedback-card">
+                        <div class="card-header">
+                            <strong>來自: ${name} (${identity})</strong>
+                            <span class="timestamp">${timestamp}</span>
+                        </div>
+                        <div class="card-body">
+                            <h4>最有啟發的觀點 (Q13)</h4>
+                            <p>${q13_insight}</p>
+                            <h4>打算如何應用 (Q14)</h4>
+                            <p>${q14_application}</p>
+                            <h4>具體改善建議 (Q15)</h4>
+                            <p>${q15_suggestion}</p>
+                        </div>
+                    </div>
+                `;
+
+                // 插入到容器中
+                container.innerHTML += cardHtml;
+            });
+        }
+    </script>
+
+</body>
+</html>
